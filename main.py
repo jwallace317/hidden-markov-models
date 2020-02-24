@@ -57,9 +57,9 @@ def main():
                             transitions,
                             length=5)
 
-    input()
-
-    hmm.viterbi(sequences[0, :])
+    for sequence in sequences:
+        print(f'\nsequence = { sequence }')
+        hmm.viterbi(sequence)
 
 
 if __name__ == '__main__':
