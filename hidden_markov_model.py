@@ -15,15 +15,13 @@ class HiddenMarkovModel():
         self.t1 = np.zeros((len(state_space) - 1, length), dtype=np.float32)
         self.t2 = np.zeros((len(state_space) - 1, length), dtype=np.int8)
 
-    # viterbi algorithm to compute most likely path
-    def viterbi(self, sequence):
-        states_dict = {}
+    # viterbi algorithm to compute most likely state path given observations
+    def viterbi(self, observations):
         for i, state in enumerate(self.state_space[1:]):
-            states_dict[state] = i
             self.t1[i, 0] = self.transitions[i, len(
-                self.state_space) - 1] * self.emissions[sequence[0] - 1, states_dict[state]]
+                self.state_space) - 1] * self.emissions[observations[0] - 1, i]
 
-        for j, observation in enumerate(sequence[1:], start=1):
+        for j, observation in enumerate(observations[1:], start=1):
             max_values = np.zeros(
                 (len(self.state_space) - 1, len(self.state_space) - 1))
             for i, src_state in enumerate(self.state_space[1:]):
@@ -46,12 +44,13 @@ class HiddenMarkovModel():
 
         max_values = [max_value]
         max_states = [max_state]
-        for j, observation in zip(range(len(sequence) - 1, 0, -1), sequence[::-1]):
+        for j, observation in zip(range(len(observations) - 1, 0, -1), observations[::-1]):
             prev_max_state_index = self.t2[max_value, j]
-            # print(f'\nprev max state index = { prev_max_state_index }')
+            print(f'\nprev max state index = { prev_max_state_index }')
             prev_max_state = self.state_space[prev_max_state_index + 1]
             # print(f'\nprev max state = { prev_max_state }')
             max_states.append(prev_max_state)
+            max_value = prev_max_state_index
             # print(f'\nmax prob state path = { max_states }')
 
         print('\nmax path')

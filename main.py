@@ -50,8 +50,9 @@ def main():
     print('\ntrimmed sequence vector')
     print(sequences)
 
-    max_prob_state_paths = []
+    max_state_paths = []
     for sequence in sequences:
+        sequence = sequence[sequence != 0]
         print(f'\nsequence = { sequence }')
 
         # instantiate hidden markov model
@@ -59,15 +60,20 @@ def main():
                                 states,
                                 emissions,
                                 transitions,
-                                length=5)
+                                length=len(sequence))
 
         # viterbi algorithm
         max_prob_state_path = hmm.viterbi(sequence)
 
-        max_prob_state_paths.append(max_prob_state_path)
+        max_state_paths.append(max_prob_state_path)
 
-    print('\nstate path of maximum probability given the sequence')
-    print(max_prob_state_paths)
+    print('\n-------------------------MAX STATE PATHS GIVEN OBSERVED SEQUENCE-------------------------')
+    print('{:^30s} {:^30s} {:^30s}'.format(
+        'index', 'observed sequence', 'max state path'))
+    for i, sequence in enumerate(sequences):
+        sequence = sequence[sequence != 0]
+        print('{:^30d} {:^30s} {:^30s}'.format(
+            i, str(sequence), str(max_state_paths[i])))
 
 
 if __name__ == '__main__':
