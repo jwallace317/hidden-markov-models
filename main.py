@@ -50,16 +50,24 @@ def main():
     print('\ntrimmed sequence vector')
     print(sequences)
 
-    # instantiate hidden markov model
-    hmm = HiddenMarkovModel(observations,
-                            states,
-                            emissions,
-                            transitions,
-                            length=5)
-
+    max_prob_state_paths = []
     for sequence in sequences:
         print(f'\nsequence = { sequence }')
-        hmm.viterbi(sequence)
+
+        # instantiate hidden markov model
+        hmm = HiddenMarkovModel(observations,
+                                states,
+                                emissions,
+                                transitions,
+                                length=5)
+
+        # viterbi algorithm
+        max_prob_state_path = hmm.viterbi(sequence)
+
+        max_prob_state_paths.append(max_prob_state_path)
+
+    print('\nstate path of maximum probability given the sequence')
+    print(max_prob_state_paths)
 
 
 if __name__ == '__main__':
