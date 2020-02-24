@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 
+# import hidden markov model class
 from hidden_markov_model import HiddenMarkovModel
 
 
@@ -10,44 +11,53 @@ def main():
 
     # read in provided csv data
     emissions_df = pd.read_csv('./lab3data/observationProbs.csv')
-    transition_probability_df = pd.read_csv('./lab3data/transitionProbs.csv')
+    transitions_df = pd.read_csv('./lab3data/transitionProbs.csv')
     sequences_df = pd.read_csv('./lab3data/testData.csv')
 
     # print the data frames
-    print('emission probability')
+    print('\nemission probability data frame')
     print(emissions_df.head())
-    print('transition probability')
-    print(transition_probability_df.head())
-    print('test sequences')
+    print('\ntransition probability data frame')
+    print(transitions_df.head())
+    print('\ntest sequences data frame')
     print(sequences_df.head())
 
-    # get observed state space and the unobserved state space
-    observed_states = emissions_df['P(x|...)']
-    unobserved_states = list(emissions_df.columns)
+    # get observed space and state space
+    observations = emissions_df['P(x|...)']
+    states = list(emissions_df.columns)
 
     # print the state spcaes
-    print(observed_states)
-    print(unobserved_states)
+    print('\nobservation space')
+    print(observations)
+    print('\nstate space')
+    print(states)
 
     # convert the data frames to numpy arrays
     emissions = emissions_df.to_numpy()
-    transition_probability = transition_probability_df.to_numpy()
+    transitions = transitions_df.to_numpy()
     sequences = sequences_df.to_numpy()
 
-    # print the trimmed emission and transition matrix
-    transition_probability = np.delete(transition_probability, 0, axis=1)
-    print(transition_probability)
+    # trim the matrices of meta data
     emissions = np.delete(emissions, 0, axis=1)
-    print(emissions)
+    transitions = np.delete(transitions, 0, axis=1)
     sequences = np.delete(sequences, 0, axis=1)
+
+    # print the trimmed matrices
+    print('\ntrimmed emission matrix')
+    print(emissions)
+    print('\ntrimmed transition matrix')
+    print(transitions)
+    print('\ntrimmed sequence vector')
     print(sequences)
 
     # instantiate hidden markov model
-    hmm = HiddenMarkovModel(observed_states,
-                            unobserved_states,
+    hmm = HiddenMarkovModel(observations,
+                            states,
                             emissions,
-                            transition_probability,
+                            transitions,
                             length=5)
+
+    input()
 
     hmm.viterbi(sequences[0, :])
 
