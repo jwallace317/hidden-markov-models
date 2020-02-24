@@ -40,14 +40,14 @@ class HiddenMarkovModel():
         max_index = np.argmax(self.t1[:, self.length - 1])
         max_state = self.state_space[max_index]
 
-        max_states = [max_state]
+        max_states_path = [max_state]
         for j, observation in zip(range(len(observations) - 1, 0, -1), observations[::-1]):
             prev_max_state_index = self.t2[max_index, j]
             prev_max_state = self.state_space[prev_max_state_index]
-            max_states.append(prev_max_state)
+            max_states_path.append(prev_max_state)
             max_index = prev_max_state_index
 
-        print('\nmax path')
-        print(max_states[::-1])
+        print('\nmax state path')
+        print(max_states_path[::-1])
 
-        return max_states[::-1]
+        return max_states_path[::-1]
