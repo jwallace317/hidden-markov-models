@@ -80,6 +80,59 @@ def main():
         print('{:^30d} {:^30s} {:^30s}'.format(
             i, str(observation), str(max_state_paths[i])))
 
+    # sampling
+    state_dict = {}
+    index_dict = {}
+    for i, state in enumerate(state_space):
+        state_dict[state] = i
+        index_dict[i] = state
+
+    print(f'state dictionary = { state_dict }')
+    print(f'index dictionary = { index_dict }')
+    print(f'observation = { observations[7] }')
+
+    weights = {}
+    for j in range(10000):
+        observation = observations[7]
+        # print(f'observation = { observation }')
+
+        states = []
+        prob_first_state = 0.5
+
+        if np.random.uniform() < 0.5:
+            states.append(state_dict['C'])
+        else:
+            states.append(state_dict['H'])
+
+        for i in range(1, len(observation)):
+            prob_next_state = transitions[state_dict['C'], states[i - 1]]
+
+            if prob_next_state > np.random.uniform():
+                states.append(state_dict['C'])
+            else:
+                states.append(state_dict['H'])
+
+        conditional_product = 1
+        for i in range(len(observation)):
+            conditional_product = conditional_product * \
+                emissions[observation[i] - 1, states[i]]
+
+        if tuple(states) not in weights:
+            weights[tuple(states)] = conditional_product
+        else:
+            weights[tuple(states)] = weights[tuple(states)] + \
+                conditional_product
+    print(f'weights = { weights }')
+
+    max_weight = 0
+    max_state_sequence = []
+    for state_sequence, weight in weights.items():
+        if weight > max_weight:
+            max_weight = weight
+            max_state_sequence = state_sequence
+
+    print(f'max state sequence = { max_state_sequence }')
+
 
 if __name__ == '__main__':
     main()
