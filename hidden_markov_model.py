@@ -15,6 +15,12 @@ class HiddenMarkovModel():
         self.t1 = np.zeros((len(state_space), length), dtype=np.float32)
         self.t2 = np.zeros((len(state_space), length), dtype=np.int8)
 
+        self.index_dict = {}
+        self.state_dict = {}
+        for i, state in enumerate(self.state_space):
+            self.index_dict[i] = state
+            self.state_dict[state] = i
+
     # viterbi algorithm to compute most likely state path given observations
     def viterbi(self, observations):
         for i in range(len(self.state_space)):
@@ -51,3 +57,49 @@ class HiddenMarkovModel():
         print(max_states_path[::-1])
 
         return max_states_path[::-1]
+
+    # return the most likely state path given the observation
+    def sample(self, observation, n):
+        state_path_weights = {}
+        for i in range(n):
+            state_path = []
+
+            # calculate first state
+            prior_prob = self.transitions[self.state_dict['C'], 2]
+            if prior_prob > np.random.uniform():
+                state_path.append(self.state_dict['C'])
+            else:
+                state_path.append(self.state_dict['H'])
+
+            # calculate the remaining states
+            for j in range(1, len(observation)):
+                conditional_prob = self.transitions[self.state_dict['C'],
+                                                    state_path[j - 1]]
+                if conditional_prob > np.random.uniform():
+                    state_path.append(self.state_dict['C'])
+                else:
+                    state_path.append(self.state_dict['H'])
+
+            # calculate weight of state path
+            weight = 1
+            for observed, state in zip(observation, state_path):
+                weight *= self.emissions[observed - 1, state]
+
+            # add to weight dictionary
+            if tuple(state_path) not in state_path_weights:
+                state_path_weights[tuple(state_path)] = weight
+            else:
+                state_path_weights[tuple(state_path)] += weight
+
+            max_weight = 0
+            max_state_path = []
+            for path, weight in state_path_weights.items():
+                if weight > max_weight:
+                    max_weight = weight
+                    max_state_path = path
+
+            max_states = []
+            for index in max_state_path:
+                max_states.append(self.index_dict[index])
+
+        return max_states
