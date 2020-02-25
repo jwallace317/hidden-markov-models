@@ -88,89 +88,41 @@ class HiddenMarkovModel():
 
     # compute the most likely state path given an observation using the forward backward algorithm
     def forward_backward(self, observation):
+        # initial probability distribution
         initial_probs = self.transitions[0:len(
             self.state_space), len(self.state_space)]
-        print(f'initial probabilities = { initial_probs }')
-        #
+
+        # transitions matrix
         transition_probs = self.transitions[0:2, 0:2]
-        print('transition matrix')
-        print(transition_probs)
-        #
-        # observation_probs = np.diag(self.emissions[observation[0] - 1, :])
-        # print('observation matrix')
-        # print(observation_probs)
-        #
-        # initial = np.dot(
-        #     np.dot(initial_probs, transition_probs), observation_probs)
-        # print(f'initial value vector = { initial }')
-        #
-        # initial_norm = initial / np.sum(initial)
-        # print(f'initial value vector normalized = { initial_norm }')
 
-        f = np.zeros((len(observation) + 1, len(self.state_space)))
-        f[0, :] = initial_probs
+        # forward pass
+        forward = np.zeros((len(observation) + 1, len(self.state_space)))
+        forward[0, :] = initial_probs
         for i in range(len(observation)):
-            print('forward')
             observation_probs = np.diag(self.emissions[observation[i] - 1, :])
-            print('observation matrix')
-            print(observation_probs)
+            forward[i + 1, :] = np.linalg.multi_dot([forward[i, :], transition_probs, observation_probs]) / np.sum(
+                np.linalg.multi_dot([forward[i, :], transition_probs, observation_probs]))
 
-            dot = np.dot(
-                np.dot(f[i, :], transition_probs), observation_probs)
-            print(f'dot product = { dot }')
-
-            dot /= np.sum(dot)
-            print(f'dot norm = { dot }')
-
-            f[i + 1, :] = dot
-        print('f')
-        print(f)
-
+        # initial probability distribution
         initial_probs = np.ones((1, len(self.state_space)))
-        print(f'initial probabilities = { initial_probs }')
 
-        b = np.zeros((len(observation) + 1, len(self.state_space)))
-        b[len(observation), :] = initial_probs
+        # backward pass
+        backward = np.zeros((len(observation) + 1, len(self.state_space)))
+        backward[len(observation), :] = initial_probs
         for i in range(len(observation))[::-1]:
-            print('back')
-            print(i)
             observation_probs = np.diag(self.emissions[observation[i] - 1, :])
-            print('observation matrix')
-            print(observation_probs)
+            backward[i, :] = np.linalg.multi_dot([backward[i + 1, :], transition_probs, observation_probs]) / np.sum(
+                np.linalg.multi_dot([backward[i + 1, :], transition_probs, observation_probs]))
 
-            print(i)
-            print(b[i, :])
-
-            dot = np.dot(
-                np.dot(b[i + 1, :], transition_probs), observation_probs)
-            print(f'dot product = { dot }')
-
-            dot /= np.sum(dot)
-            print(f'dot norm = { dot }')
-
-            b[i, :] = dot
-
-        print('f and b')
-        print(f)
-        print(b)
-
+        # smoothing values
         s = np.zeros((len(observation) + 1, len(self.state_space)))
         for i in range(len(observation) + 1):
-            print('smooth')
-            s[i, :] = f[i, :] * b[i, :]
-            print(s[i, :])
-            s[i, :] /= np.sum(s[i, :])
-            print(s[i, :])
+            s[i, :] = forward[i, :] * backward[i, :] / \
+                np.sum(forward[i, :] * backward[i, :])
 
-        print('f, b, s')
-        print(f)
-        print(b)
-        print(s)
-        indices = np.argmax(s, axis=1)
-        print(np.argmax(s, axis=1))
-
+        # compute state path
         path = []
-        for index in indices[1:]:
+        for index in np.argmax(s, axis=1)[1:]:
             path.append(self.state_space[index])
 
         return path

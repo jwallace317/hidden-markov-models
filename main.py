@@ -69,7 +69,7 @@ def main():
         max_state_paths.append(max_state_path)
 
     # print the max state paths given the observed sequences
-    print('\n-------------------------MAX STATE PATHS GIVEN OBSERVED SEQUENCE-------------------------')
+    print('\n--------------------------------VITERBIS ALGORITHM RESULTS-------------------------------')
     print('{:^30s} {:^30s} {:^30s}'.format(
         'index', 'observed sequence', 'max state path'))
     for i, observation in enumerate(observations):
@@ -104,10 +104,20 @@ def main():
             str(observation), str(sample_path), str(max_path), sample_size))
 
     # forward backward algorithm
-    observation = observations[4]
-    observation = observation[observation != 0]
-    print(f'\nobservation = { observation }')
-    print(hmm.forward_backward(observation))
+    fb_states = []
+    for observation in observations:
+        # trim observation
+        observation = observation[observation != 0]
+
+        # compute forward backward algorithm given the observation
+        fb_states.append(hmm.forward_backward(observation))
+
+    print('\n----------------------------FORWARD BACKWARD ALGORITHM RESULTS---------------------------')
+    print('{:^30s} {:^30s} {:^30s}'.format(
+        'observation', 'forward backward', 'viterbi'))
+    for observation, fb_path, max_path in zip(observations, fb_states, max_state_paths):
+        print('{:^30s} {:^30s} {:^30s}'.format(
+            str(observation), str(fb_path), str(max_path)))
 
 
 if __name__ == '__main__':
