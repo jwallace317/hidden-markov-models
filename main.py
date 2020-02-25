@@ -37,7 +37,7 @@ def main():
     transitions = transitions_df.to_numpy()
     observations = observations_df.to_numpy()
 
-    # trim the matrices of meta data
+    # trim the matrices of unnecessary meta data
     emissions = np.delete(emissions, 0, axis=1)
     transitions = np.delete(transitions, 0, axis=1)
     observations = np.delete(observations, 0, axis=1)
@@ -54,9 +54,6 @@ def main():
     for observation in observations:
         # trim observation
         observation = observation[observation != 0]
-
-        # print trimmed observation
-        print(f'\nobservation = { observation }')
 
         # instantiate hidden markov model
         hmm = HiddenMarkovModel(observation_space,
@@ -80,16 +77,13 @@ def main():
         print('{:^30d} {:^30s} {:^30s}'.format(
             i, str(observation), str(max_state_paths[i])))
 
-    # sampling
+    # likelihood sampling for approximate inference
     sample_size_convergence = []
     sample_state_paths = []
-    sample_sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+    sample_sizes = np.arange(1, 10)**2
     for i, observation in enumerate(observations):
         # trim observation
         observation = observation[observation != 0]
-
-        # print trimmed observation
-        print(f'\nobservation = { observation }')
 
         # generate sample state paths for sample sizes
         for sample_size in sample_sizes:
