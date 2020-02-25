@@ -15,12 +15,6 @@ class HiddenMarkovModel():
         self.t1 = np.zeros((len(state_space), length), dtype=np.float32)
         self.t2 = np.zeros((len(state_space), length), dtype=np.int8)
 
-        self.index_dict = {}  # index to state dictionary
-        self.state_dict = {}  # state to index dictionary
-        for i, state in enumerate(self.state_space):
-            self.index_dict[i] = state
-            self.state_dict[state] = i
-
     # viterbi algorithm to compute most likely state path given observations
     def viterbi(self, observations):
         for i in range(len(self.state_space)):
@@ -56,20 +50,20 @@ class HiddenMarkovModel():
             sample_path = []
 
             # calculate first state
-            prior_prob = self.transitions[self.state_dict['C'], 2]
+            prior_prob = self.transitions[self.state_space.index('C'), 2]
             if prior_prob > np.random.uniform():
-                sample_path.append(self.state_dict['C'])
+                sample_path.append(self.state_space.index('C'))
             else:
-                sample_path.append(self.state_dict['H'])
+                sample_path.append(self.state_space.index('H'))
 
             # calculate the remaining states
             for j in range(1, len(observation)):
-                conditional_prob = self.transitions[self.state_dict['C'],
-                                                    sample_path[j - 1]]
-                if conditional_prob > np.random.uniform():
-                    sample_path.append(self.state_dict['C'])
+                transition_prob = self.transitions[self.state_space.index(
+                    'C'), sample_path[j - 1]]
+                if transition_prob > np.random.uniform():
+                    sample_path.append(self.state_space.index('C'))
                 else:
-                    sample_path.append(self.state_dict['H'])
+                    sample_path.append(self.state_space.index('H'))
 
             # calculate weight of state path
             weight = 1
@@ -92,6 +86,6 @@ class HiddenMarkovModel():
 
             max_states = []
             for index in max_state_path:
-                max_states.append(self.index_dict[index])
+                max_states.append(self.state_space[index])
 
         return max_states
