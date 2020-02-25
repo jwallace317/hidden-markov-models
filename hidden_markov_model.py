@@ -15,7 +15,7 @@ class HiddenMarkovModel():
         self.t1 = np.zeros((len(state_space), length), dtype=np.float32)
         self.t2 = np.zeros((len(state_space), length), dtype=np.int8)
 
-    # viterbi algorithm to compute most likely state path given observations
+    # viterbi algorithm to compute the most likely state path given observations
     def viterbi(self, observations):
         for i in range(len(self.state_space)):
             self.t1[i, 0] = self.transitions[i, len(
@@ -45,8 +45,11 @@ class HiddenMarkovModel():
 
     # return the most likely state path given the observation
     def sample(self, observation, n):
+        # create sample path weights dictionary
         sample_path_weights = {}
         for i in range(n):
+
+            # create empty samplepath
             sample_path = []
 
             # calculate first state
@@ -76,16 +79,9 @@ class HiddenMarkovModel():
             else:
                 sample_path_weights[tuple(sample_path)] += weight
 
-            # find max weight and max sample state path
-            max_weight = 0
-            max_sample_path = []
-            for path, weight in sample_path_weights.items():
-                if weight > max_weight:
-                    max_weight = weight
-                    max_state_path = path
-
+            # compute max state path
             max_states = []
-            for index in max_state_path:
+            for index in max(sample_path_weights, key=sample_path_weights.get):
                 max_states.append(self.state_space[index])
 
         return max_states
