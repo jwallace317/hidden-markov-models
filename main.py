@@ -104,7 +104,7 @@ def main():
             str(observation), str(sample_path), str(max_path), sample_size))
 
     # forward backward algorithm
-    observation = observations[0]
+    observation = observations[4]
     observation = observation[observation != 0]
     print(f'\nobservation = { observation }')
     print(hmm.forward_backward(observation))
