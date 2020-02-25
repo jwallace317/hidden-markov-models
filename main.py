@@ -103,6 +103,12 @@ def main():
         print('{:^30s} {:^30s} {:^30s} {:^30d}'.format(
             str(observation), str(sample_path), str(max_path), sample_size))
 
+    # forward backward algorithm
+    observation = observations[0]
+    observation = observation[observation != 0]
+    print(f'\nobservation = { observation }')
+    print(hmm.forward_backward(observation))
+
 
 if __name__ == '__main__':
     main()

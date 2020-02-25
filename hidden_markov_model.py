@@ -85,3 +85,38 @@ class HiddenMarkovModel():
                 max_states.append(self.state_space[index])
 
         return max_states
+
+    # compute the most likely state path given an observation using the forward backward algorithm
+    def forward_backward(self, observation):
+        initial_probs = self.transitions[0:len(
+            self.state_space), len(self.state_space)]
+        print(f'initial probabilities = { initial_probs }')
+
+        transition_probs = self.transitions[0:2, 0:2]
+        print('transition matrix')
+        print(transition_probs)
+
+        observation_probs = np.diag(self.emissions[observation[0], :])
+        print('observation matrix')
+        print(observation_probs)
+
+        initial = np.dot(
+            np.dot(initial_probs, transition_probs), observation_probs)
+        print(f'initial value vector = { initial }')
+        print(f'initial value vector shape = { initial.shape }')
+
+        initial_norm = initial / np.sum(initial)
+        print(f'initial value vector normalized = { initial_norm }')
+
+        f = [initial_norm]
+        for i in range(1, len(observation)):
+            observation_probs = np.diag(self.emissions[observation[i] - 1, :])
+            print('observation matrix')
+            print(observation_probs)
+            dot = np.dot(np.dot(f[i - 1], transition_probs), observation_probs)
+            print(f'dot product = { dot }')
+            dot /= np.sum(dot)
+            print(f'dot norm = { dot }')
+            f.append(dot)
+
+        return 1
