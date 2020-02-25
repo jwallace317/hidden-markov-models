@@ -69,13 +69,11 @@ def main():
         max_state_paths.append(max_state_path)
 
     # print the max state paths given the observed sequences
-    print('\n--------------------------------VITERBIS ALGORITHM RESULTS-------------------------------')
-    print('{:^30s} {:^30s} {:^30s}'.format(
-        'index', 'observed sequence', 'max state path'))
-    for i, observation in enumerate(observations):
+    print('\n---------------VITERBIS ALGORITHM RESULTS-----------------')
+    print('{:^30s} {:^30s}'.format('observation', 'max state path'))
+    for observation, max_path in zip(observations, max_state_paths):
         observation = observation[observation != 0]
-        print('{:^30d} {:^30s} {:^30s}'.format(
-            i, str(observation), str(max_state_paths[i])))
+        print('{:^30s} {:^30s}'.format(str(observation), str(max_path)))
 
     # likelihood sampling for approximate inference
     sample_size_convergence = []
@@ -87,7 +85,7 @@ def main():
 
         # generate sample state paths for sample sizes
         for sample_size in sample_sizes:
-            sample_state_path = hmm.sample(observation, sample_size)
+            sample_state_path = hmm.likelihood_sample(observation, sample_size)
 
             # if convergence is reached, break
             if max_state_paths[i] == sample_state_path:
@@ -98,26 +96,28 @@ def main():
     # print the likelihood sampling convergence results
     print('\n-----------------------------------------LIKELIHOOD SAMPLING CONVERGENCE RESULTS-----------------------------------------')
     print('{:^30s} {:^30s} {:^30s} {:^30s}'.format(
-        'observation', 'sampled state path', 'max state path', 'sample size at convergence'))
-    for observation, sample_path, max_path, sample_size in zip(observations, sample_state_paths, max_state_paths, sample_size_convergence):
+        'observation', 'max state path', 'sampled state path', 'sample size at convergence'))
+    for observation, max_path, sample_path, sample_size in zip(observations, max_state_paths, sample_state_paths, sample_size_convergence):
+        observation = observation[observation != 0]
         print('{:^30s} {:^30s} {:^30s} {:^30d}'.format(
-            str(observation), str(sample_path), str(max_path), sample_size))
+            str(observation), str(max_path), str(sample_path), sample_size))
 
     # forward backward algorithm
-    fb_states = []
+    fb_paths = []
     for observation in observations:
         # trim observation
         observation = observation[observation != 0]
 
         # compute forward backward algorithm given the observation
-        fb_states.append(hmm.forward_backward(observation))
+        fb_paths.append(hmm.forward_backward(observation))
 
     print('\n----------------------------FORWARD BACKWARD ALGORITHM RESULTS---------------------------')
     print('{:^30s} {:^30s} {:^30s}'.format(
-        'observation', 'forward backward', 'viterbi'))
-    for observation, fb_path, max_path in zip(observations, fb_states, max_state_paths):
+        'observation', 'max state path', 'forward backward path'))
+    for observation, max_path, fb_path in zip(observations, max_state_paths, fb_paths):
+        observation = observation[observation != 0]
         print('{:^30s} {:^30s} {:^30s}'.format(
-            str(observation), str(fb_path), str(max_path)))
+            str(observation[observation != 0]), str(max_path), str(fb_path)))
 
 
 if __name__ == '__main__':

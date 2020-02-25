@@ -44,7 +44,7 @@ class HiddenMarkovModel():
         return max_states_path[::-1]
 
     # return the most likely state path given the observation
-    def sample(self, observation, n):
+    def likelihood_sample(self, observation, n):
         # create sample path weights dictionary
         sample_path_weights = {}
         for i in range(n):
