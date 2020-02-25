@@ -4,7 +4,6 @@ import pandas as pd
 
 # import hidden markov model class
 from hidden_markov_model import HiddenMarkovModel
-from likelihood_sampler import LikelihoodSampler
 
 
 # task main
@@ -82,12 +81,33 @@ def main():
             i, str(observation), str(max_state_paths[i])))
 
     # sampling
-    likelihood_sampler = LikelihoodSampler(state_space, emissions, transitions)
+    sample_size_convergence = []
+    sample_state_paths = []
+    sample_sizes = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+    for i, observation in enumerate(observations):
+        # trim observation
+        observation = observation[observation != 0]
 
-    observation = observations[7]
-    observation = observation[observation != 0]
-    print(f'observation = { observation }')
-    print(hmm.sample(observation, 1000))
+        # print trimmed observation
+        print(f'\nobservation = { observation }')
+
+        # generate sample state paths for sample sizes
+        for sample_size in sample_sizes:
+            sample_state_path = hmm.sample(observation, sample_size)
+
+            # if convergence is reached, break
+            if max_state_paths[i] == sample_state_path:
+                sample_size_convergence.append(sample_size)
+                sample_state_paths.append(sample_state_path)
+                break
+
+    # print the likelihood sampling convergence results
+    print('\n-----------------------------------------LIKELIHOOD SAMPLING CONVERGENCE RESULTS-----------------------------------------')
+    print('{:^30s} {:^30s} {:^30s} {:^30s}'.format(
+        'observation', 'sampled state path', 'max state path', 'sample size at convergence'))
+    for observation, sample_path, max_path, sample_size in zip(observations, sample_state_paths, max_state_paths, sample_size_convergence):
+        print('{:^30s} {:^30s} {:^30s} {:^30d}'.format(
+            str(observation), str(sample_path), str(max_path), sample_size))
 
 
 if __name__ == '__main__':
